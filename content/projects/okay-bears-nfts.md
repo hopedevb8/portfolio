@@ -6,7 +6,7 @@ external: 'https://okay-bears-marketplace.pages.dev/'
 tech:
   - React.js
   - Styled Components
-company: 'Independent'
+company: 'Branch 8'
 showInProjects: true
 profile: 'dinhhop'
 ---

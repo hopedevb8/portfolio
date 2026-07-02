@@ -1,5 +1,5 @@
 ---
-date: '2024-02-01'
+date: '2022-02-01'
 title: 'HomeandHome'
 external: 'https://apps.apple.com/vn/app/hhome/id1606280635?platform=iphone'
 ios: 'https://apps.apple.com/vn/app/hhome/id1606280635?platform=iphone'

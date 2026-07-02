@@ -8,7 +8,7 @@ tech:
   - Ant Design
   - Shadcn UI
   - Framer Motion
-company: ''
+company: 'HELIGATE'
 showInProjects: true
 profile: 'dinhhop'
 ios: ''

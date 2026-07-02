@@ -1,5 +1,5 @@
 ---
-date: '2024-11-01'
+date: '2025-11-01'
 title: 'BeeProxy'
 github: 'https://github.com/cybersharkjsc/beeprx-fe-module-website'
 external: 'https://beeproxy.com/'
@@ -8,7 +8,7 @@ tech:
   - Tailwind CSS
   - Ant Design
   - SASS
-company: 'CyberShark'
+company: 'HELIGATE'
 showInProjects: true
 profile: 'dinhhop'
 ios: ''
