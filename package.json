@@ -18,7 +18,7 @@
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "start": "npm run develop",
     "serve": "node scripts/run-gatsby.cjs serve",
-    "deploy": "npm run build && gh-pages -d public",
+    "deploy": "node scripts/run-gatsby.cjs build --prefix-paths && gh-pages -d public",
     "clean": "node scripts/run-gatsby.cjs clean",
     "prepare": "husky install",
     "lint-staged": "lint-staged"
