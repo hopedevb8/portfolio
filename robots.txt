@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://hopedev.pages.dev/sitemap.xml
+Host: https://hopedev.pages.dev
