@@ -15,7 +15,11 @@ if(!command)
     process.exit(1)
 }
 
-const sharedGraphqlDir = path.join(rootDir, 'node_modules', 'gatsby', 'node_modules', 'graphql');
+const graphqlCandidates = [
+    path.join(rootDir, 'node_modules', 'gatsby', 'node_modules', 'graphql'),
+    path.join(rootDir, 'node_modules', 'gatsby-recipes', 'node_modules', 'graphql'),
+    path.join(rootDir, 'node_modules', 'graphql')
+];
 const graphqlLinks = [
     path.join(rootDir, 'node_modules', 'graphql'),
     path.join(rootDir, 'node_modules', 'gatsby-recipes', 'node_modules', 'graphql')
@@ -78,9 +82,11 @@ const patchPostcssPackageExports = () =>
     fs.writeFileSync(postcssPackageJsonPath, `${JSON.stringify(postcssPackageJson, null, 2)}\n`);
 };
 
-if(!fs.existsSync(sharedGraphqlDir))
+const sharedGraphqlDir = graphqlCandidates.find((_path) => fs.existsSync(_path));
+
+if(!sharedGraphqlDir)
 {
-    console.error(`Missing shared graphql directory: ${sharedGraphqlDir}`);
+    console.error(`Missing shared graphql directory. Checked:\n${graphqlCandidates.join('\n')}`);
     process.exit(1);
 }
 

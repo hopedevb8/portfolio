@@ -1,24 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <title>Dinh Hop Favicon</title>
-  <g transform="translate(26 20)">
-    <polygon
-      points="230 0 0 130 0 392 230 512 460 386 460 136"
-      fill="#0a192f"
-      stroke="#64ffda"
-      stroke-width="28"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <text
-      x="230"
-      y="308"
-      text-anchor="middle"
-      font-size="150"
-      font-weight="700"
-      font-family="Arial, sans-serif"
-      fill="#64ffda"
-    >
-      DH
-    </text>
-  </g>
+  <title>H Favicon</title>
+  <rect width="512" height="512" rx="88" ry="88" fill="#10192f" />
+  <text
+    x="256"
+    y="336"
+    text-anchor="middle"
+    font-size="300"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+    fill="#5be2d4"
+  >
+    H
+  </text>
 </svg>

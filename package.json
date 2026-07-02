@@ -16,6 +16,7 @@
     "build": "node scripts/run-gatsby.cjs build",
     "develop": "node scripts/run-gatsby.cjs develop",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+    "generate:favicons": "node scripts/generate-favicons.cjs",
     "start": "npm run develop",
     "serve": "node scripts/run-gatsby.cjs serve",
     "deploy": "node scripts/run-gatsby.cjs build --prefix-paths && gh-pages -d public",

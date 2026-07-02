@@ -3,7 +3,7 @@ date: '2021-02-01'
 title: 'Frontend Developer (Remote)'
 company: 'STHRIVE'
 location: 'Remote'
-range: 'Dec 2020 - Feb 2021'
+range: 'Dec 2021 - Feb 2022'
 profile: 'dinhhop'
 ---
 
