@@ -11,6 +11,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      GATSBY_CPU_COUNT: 1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
