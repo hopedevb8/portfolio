@@ -3,7 +3,7 @@ date: '2026-06-01'
 title: 'Frontend Sub Lead'
 company: 'HELIGATE'
 location: 'Vietnam'
-range: 'March 2023 - June 2026'
+range: 'March 2025 - June 2026'
 profile: 'dinhhop'
 ---
 
