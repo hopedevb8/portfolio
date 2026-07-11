@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
+import { withPrefix } from 'gatsby';
 import { Layout } from '@components';
 import { getApiBaseUrl } from '@utils';
 import { AdminAuthProvider, useAdminAuth } from '../context/adminAuth';
@@ -220,6 +221,28 @@ const StyledAdminPage = styled.div`
     color: var(--light-slate);
     font-size: var(--fz-xxs);
     line-height: 1.6;
+  }
+
+  .upload-preview {
+    width: min(100%, 320px);
+    border: 1px solid var(--lightest-navy);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(2, 12, 27, 0.72);
+  }
+
+  .upload-preview img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .upload-preview figcaption {
+    padding: 10px 12px;
+    color: var(--light-slate);
+    font-size: var(--fz-xxs);
+    line-height: 1.5;
   }
 
   .form-status {
@@ -510,6 +533,24 @@ const formatProjectForm = project => ({
   showInProjects: project.showInProjects !== false,
 });
 
+const resolveFeaturedImageUrl = (imageUrl, apiBaseUrl) => {
+  const nextImageUrl = String(imageUrl || '').trim();
+
+  if (!nextImageUrl) {
+    return '';
+  }
+
+  if (/^(https?:)?\/\//i.test(nextImageUrl) || nextImageUrl.startsWith('data:')) {
+    return nextImageUrl;
+  }
+
+  if (nextImageUrl.startsWith('/uploads/')) {
+    return apiBaseUrl ? `${apiBaseUrl}${nextImageUrl}` : nextImageUrl;
+  }
+
+  return withPrefix(nextImageUrl);
+};
+
 const AdminPage = ({ location }) => {
   const apiBaseUrl = useMemo(() => getApiBaseUrl(), []);
   const { authStatus, user, authReason, login, logout, apiClient, isAuthenticated } = useAdminAuth();
@@ -535,6 +576,7 @@ const AdminPage = ({ location }) => {
     password: '',
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] = useState(false);
   const [authError, setAuthError] = useState('');
 
   const request = async (endpoint, options = {}) => {
@@ -629,6 +671,68 @@ const AdminPage = ({ location }) => {
       ...currentState,
       [name]: value,
     }));
+  };
+
+  const handleFeaturedImageUpload = async event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    if (!apiBaseUrl) {
+      setStatusMessage({
+        kind: 'error',
+        text: 'API is not available. Start the backend before uploading featured images.',
+      });
+      return;
+    }
+
+    setIsUploadingFeaturedImage(true);
+    setStatusMessage({
+      kind: 'idle',
+      text: '',
+    });
+
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Failed to read image file.'));
+        reader.readAsDataURL(file);
+      });
+
+      const response = await request('/api/uploads/featured', {
+        method: 'POST',
+        body: JSON.stringify({
+          fileName: file.name,
+          dataUrl,
+        }),
+      });
+
+      const nextImageUrl = response?.data?.imageUrl || '';
+
+      if (!nextImageUrl) {
+        throw new Error('Upload completed without an image URL.');
+      }
+
+      setFeaturedForm(currentState => ({
+        ...currentState,
+        imageUrl: nextImageUrl,
+      }));
+      setStatusMessage({
+        kind: 'success',
+        text: 'Featured image uploaded.',
+      });
+    } catch (error) {
+      setStatusMessage({
+        kind: 'error',
+        text: error.message,
+      });
+    } finally {
+      setIsUploadingFeaturedImage(false);
+    }
   };
 
   const handleLogin = async event => {
@@ -865,185 +969,211 @@ const AdminPage = ({ location }) => {
     }
   };
 
-  const renderFeaturedPanel = () => (
-    <div className="panel-grid">
-      <div className="editor-card">
-        <h3>{editingFeaturedId ? 'Edit Featured Project' : 'Create Featured Project'}</h3>
+  const renderFeaturedPanel = () => {
+    const featuredPreviewUrl = resolveFeaturedImageUrl(featuredForm.imageUrl, apiBaseUrl);
 
-        <form onSubmit={submitFeatured}>
-          <div className="field-grid">
-            <div className="field">
-              <label htmlFor="featured-date">Date</label>
-              <input
-                id="featured-date"
-                name="date"
-                type="date"
-                value={featuredForm.date}
-                onChange={handleFeaturedChange}
-                required
-              />
+    return (
+      <div className="panel-grid">
+        <div className="editor-card">
+          <h3>{editingFeaturedId ? 'Edit Featured Project' : 'Create Featured Project'}</h3>
+
+          <form onSubmit={submitFeatured}>
+            <div className="field-grid">
+              <div className="field">
+                <label htmlFor="featured-date">Date</label>
+                <input
+                  id="featured-date"
+                  name="date"
+                  type="date"
+                  value={featuredForm.date}
+                  onChange={handleFeaturedChange}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="featured-title">Title</label>
+                <input
+                  id="featured-title"
+                  name="title"
+                  type="text"
+                  value={featuredForm.title}
+                  onChange={handleFeaturedChange}
+                  required
+                />
+              </div>
             </div>
 
             <div className="field">
-              <label htmlFor="featured-title">Title</label>
+              <label htmlFor="featured-image-upload">Featured Image</label>
               <input
-                id="featured-title"
-                name="title"
+                id="featured-image-upload"
+                name="featuredImageUpload"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                onChange={handleFeaturedImageUpload}
+                disabled={isUploadingFeaturedImage || isLoading}
+              />
+              <small>
+                Upload a JPG, PNG, WebP, GIF, or AVIF file. The backend will store it and fill the image path
+                automatically.
+              </small>
+            </div>
+
+            <div className="field">
+              <label htmlFor="featured-image-url">Stored Image Path</label>
+              <input
+                id="featured-image-url"
+                name="imageUrl"
                 type="text"
-                value={featuredForm.title}
+                value={featuredForm.imageUrl}
+                onChange={handleFeaturedChange}
+                placeholder="/uploads/featured/example-cover.png"
+                required
+              />
+              <small>
+                You can still paste a manual URL here, but uploaded images will use `/uploads/featured/...`.
+              </small>
+            </div>
+
+            {featuredPreviewUrl && (
+              <figure className="upload-preview">
+                <img src={featuredPreviewUrl} alt={featuredForm.title || 'Featured preview'} loading="lazy" />
+                <figcaption>{featuredForm.imageUrl}</figcaption>
+              </figure>
+            )}
+
+            <div className="field-grid">
+              <div className="field">
+                <label htmlFor="featured-github">GitHub URL</label>
+                <input
+                  id="featured-github"
+                  name="github"
+                  type="url"
+                  value={featuredForm.github}
+                  onChange={handleFeaturedChange}
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="featured-external">External URL</label>
+                <input
+                  id="featured-external"
+                  name="external"
+                  type="url"
+                  value={featuredForm.external}
+                  onChange={handleFeaturedChange}
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="featured-cta">CTA URL</label>
+              <input
+                id="featured-cta"
+                name="cta"
+                type="url"
+                value={featuredForm.cta}
+                onChange={handleFeaturedChange}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="featured-tech">Tech (comma-separated)</label>
+              <input
+                id="featured-tech"
+                name="techText"
+                type="text"
+                value={featuredForm.techText}
                 onChange={handleFeaturedChange}
                 required
               />
             </div>
-          </div>
 
-          <div className="field">
-            <label htmlFor="featured-image-url">Image URL</label>
-            <input
-              id="featured-image-url"
-              name="imageUrl"
-              type="text"
-              value={featuredForm.imageUrl}
-              onChange={handleFeaturedChange}
-              placeholder="/featured/example-cover.png"
-              required
-            />
-            <small>
-              Featured images now use static paths. Put files in `static/featured` and reference
-              them like `/featured/your-image.png`.
-            </small>
-          </div>
-
-          <div className="field-grid">
             <div className="field">
-              <label htmlFor="featured-github">GitHub URL</label>
-              <input
-                id="featured-github"
-                name="github"
-                type="url"
-                value={featuredForm.github}
+              <label htmlFor="featured-description">Description</label>
+              <textarea
+                id="featured-description"
+                name="description"
+                value={featuredForm.description}
                 onChange={handleFeaturedChange}
+                required
               />
             </div>
 
-            <div className="field">
-              <label htmlFor="featured-external">External URL</label>
-              <input
-                id="featured-external"
-                name="external"
-                type="url"
-                value={featuredForm.external}
-                onChange={handleFeaturedChange}
-              />
-            </div>
-          </div>
-
-          <div className="field">
-            <label htmlFor="featured-cta">CTA URL</label>
-            <input
-              id="featured-cta"
-              name="cta"
-              type="url"
-              value={featuredForm.cta}
-              onChange={handleFeaturedChange}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="featured-tech">Tech (comma-separated)</label>
-            <input
-              id="featured-tech"
-              name="techText"
-              type="text"
-              value={featuredForm.techText}
-              onChange={handleFeaturedChange}
-              required
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="featured-description">Description</label>
-            <textarea
-              id="featured-description"
-              name="description"
-              value={featuredForm.description}
-              onChange={handleFeaturedChange}
-              required
-            />
-          </div>
-
-          <div className="form-actions">
-            <button className="primary-button" type="submit" disabled={isLoading}>
-              {editingFeaturedId ? 'Update Featured Project' : 'Create Featured Project'}
-            </button>
-            {editingFeaturedId && (
-              <button className="secondary-button" type="button" onClick={resetFeaturedEditor}>
-                Cancel Edit
+            <div className="form-actions">
+              <button className="primary-button" type="submit" disabled={isLoading || isUploadingFeaturedImage}>
+                {editingFeaturedId ? 'Update Featured Project' : 'Create Featured Project'}
               </button>
-            )}
-          </div>
-        </form>
-      </div>
+              {editingFeaturedId && (
+                <button className="secondary-button" type="button" onClick={resetFeaturedEditor}>
+                  Cancel Edit
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
 
-      <div className="list-card">
-        <h3>Featured Projects ({featuredItems.length})</h3>
+        <div className="list-card">
+          <h3>Featured Projects ({featuredItems.length})</h3>
 
-        <div className="item-list">
-          {featuredItems.length === 0 ? (
-            <div className="empty-state">No featured projects yet.</div>
-          ) : (
-            featuredItems.map(project => (
-              <article className="item-card" key={project.id}>
-                <div className="item-head">
-                  <div>
-                    <h4 className="item-title">{project.title}</h4>
-                    <div className="item-meta">
-                      {project.date}
-                      <br />
-                      {project.imageUrl}
+          <div className="item-list">
+            {featuredItems.length === 0 ? (
+              <div className="empty-state">No featured projects yet.</div>
+            ) : (
+              featuredItems.map(project => (
+                <article className="item-card" key={project.id}>
+                  <div className="item-head">
+                    <div>
+                      <h4 className="item-title">{project.title}</h4>
+                      <div className="item-meta">
+                        {project.date}
+                        <br />
+                        {project.imageUrl}
+                      </div>
+                    </div>
+
+                    <div className="item-actions">
+                      <button
+                        className="item-action"
+                        type="button"
+                        onClick={() => {
+                          setEditingFeaturedId(project.id);
+                          setFeaturedForm(formatFeaturedForm(project));
+                        }}>
+                        Edit
+                      </button>
+                      <button
+                        className="item-action delete"
+                        type="button"
+                        onClick={() =>
+                          openDeleteModal({
+                            endpoint: `/api/featured/${project.id}`,
+                            successText: 'Featured project deleted.',
+                            title: `Delete ${project.title}?`,
+                            description:
+                              'This will permanently remove the project from the Selected Work section and the public featured API.',
+                          })
+                        }>
+                        Delete
+                      </button>
                     </div>
                   </div>
 
-                  <div className="item-actions">
-                    <button
-                      className="item-action"
-                      type="button"
-                      onClick={() => {
-                        setEditingFeaturedId(project.id);
-                        setFeaturedForm(formatFeaturedForm(project));
-                      }}>
-                      Edit
-                    </button>
-                    <button
-                      className="item-action delete"
-                      type="button"
-                      onClick={() =>
-                        openDeleteModal({
-                          endpoint: `/api/featured/${project.id}`,
-                          successText: 'Featured project deleted.',
-                          title: `Delete ${project.title}?`,
-                          description:
-                            'This will permanently remove the project from the Selected Work section and the public featured API.',
-                        })
-                      }>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-
-                <div className="item-copy">{project.description}</div>
-                <ul className="item-tags">
-                  {project.tech.map(tag => (
-                    <li key={tag}>{tag}</li>
-                  ))}
-                </ul>
-              </article>
-            ))
-          )}
+                  <div className="item-copy">{project.description}</div>
+                  <ul className="item-tags">
+                    {project.tech.map(tag => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))
+            )}
+          </div>
+          </div>
         </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderJobsPanel = () => (
     <div className="panel-grid">

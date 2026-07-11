@@ -8,3 +8,4 @@ public/
 .env.production
 .env.local
 server/data/*.sqlite
+server/uploads/

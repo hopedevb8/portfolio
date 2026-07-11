@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { withPrefix } from 'gatsby';
 import styled from 'styled-components';
 import sr from '@utils/sr';
+import { getApiBaseUrl } from '@utils';
 import { srConfig } from '@config';
 import { Icon } from '@components/icons';
 import { useFeaturedData } from '@hooks/useFeaturedData';
@@ -299,6 +301,25 @@ const StyledProject = styled.li`
   }
 `;
 
+const resolveFeaturedImageUrl = imageUrl => {
+  const nextImageUrl = String(imageUrl || '').trim();
+
+  if (!nextImageUrl) {
+    return '';
+  }
+
+  if (/^(https?:)?\/\//i.test(nextImageUrl) || nextImageUrl.startsWith('data:')) {
+    return nextImageUrl;
+  }
+
+  if (nextImageUrl.startsWith('/uploads/')) {
+    const apiBaseUrl = getApiBaseUrl();
+    return apiBaseUrl ? `${apiBaseUrl}${nextImageUrl}` : nextImageUrl;
+  }
+
+  return withPrefix(nextImageUrl);
+};
+
 const Featured = () => {
   const { featuredProjects } = useFeaturedData();
   const revealTitle = useRef(null);
@@ -324,6 +345,7 @@ const Featured = () => {
         {featuredProjects.map((project, i) => {
           const { id, title, description, tech, github, external, cta, imageUrl } = project;
           const projectUrl = external || github || '#';
+          const resolvedImageUrl = resolveFeaturedImageUrl(imageUrl);
 
           return (
             <StyledProject key={id || i} ref={el => (revealProjects.current[i] = el)}>
@@ -376,7 +398,7 @@ const Featured = () => {
 
               <div className="project-image">
                 <a href={projectUrl} target="_blank" rel="noreferrer">
-                  <img src={imageUrl} alt={title} loading="lazy" />
+                  <img src={resolvedImageUrl} alt={title} loading="lazy" />
                 </a>
               </div>
             </StyledProject>

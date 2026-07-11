@@ -29,6 +29,13 @@ const {
   revokeAdminSession,
 } = require('./database');
 const {
+  maxFeaturedUploadBytes,
+  storeFeaturedUpload,
+  readUploadedAsset,
+  isManagedFeaturedUploadPath,
+  deleteManagedFeaturedUpload,
+} = require('./uploads');
+const {
   validateAdminCredentials,
   createRefreshTokenRecord,
   createAuthPayload,
@@ -80,14 +87,17 @@ const sendJson = (req, res, statusCode, payload, extraHeaders = {}) => {
   res.end(JSON.stringify(payload));
 };
 
-const parseRequestBody = req =>
+const parseRequestBody = (req, options = {}) =>
   new Promise((resolve, reject) => {
+    const maxBytes = Number(options.maxBytes || 1_000_000);
     let rawBody = '';
+    let bodySize = 0;
 
     req.on('data', chunk => {
+      bodySize += chunk.length;
       rawBody += chunk;
 
-      if (rawBody.length > 1_000_000) {
+      if (bodySize > maxBytes) {
         reject(new Error('Request body too large.'));
       }
     });
@@ -261,6 +271,33 @@ const sendUnauthorized = (req, res, message = 'Authentication required.') => {
   sendJson(req, res, 401, { error: message, code: 'UNAUTHORIZED' });
 };
 
+const getPublicBaseUrl = req => {
+  const forwardedProtocol = String(req.headers['x-forwarded-proto'] || '')
+    .split(',')
+    .map(value => value.trim())
+    .find(Boolean);
+  const forwardedHost = String(req.headers['x-forwarded-host'] || '')
+    .split(',')
+    .map(value => value.trim())
+    .find(Boolean);
+  const host = forwardedHost || req.headers.host || `${HOST}:${PORT}`;
+  const protocol = forwardedProtocol || (process.env.NODE_ENV === 'production' ? 'https' : 'http');
+
+  return `${protocol}://${host}`;
+};
+
+const deleteUnusedManagedFeaturedImage = imageUrl => {
+  if (!isManagedFeaturedUploadPath(imageUrl)) {
+    return;
+  }
+
+  const isStillReferenced = readFeaturedProjects().some(project => project.imageUrl === imageUrl);
+
+  if (!isStillReferenced) {
+    deleteManagedFeaturedUpload(imageUrl);
+  }
+};
+
 const getRequestIdentifier = req => {
   const forwardedFor = String(req.headers['x-forwarded-for'] || '')
     .split(',')
@@ -399,6 +436,29 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/uploads/')) {
+      const asset = readUploadedAsset(pathname);
+
+      if (!asset) {
+        sendJson(req, res, 404, { error: 'Uploaded asset not found.' });
+        return;
+      }
+
+      res.writeHead(200, {
+        ...createBaseHeaders(req),
+        'Content-Type': asset.mimeType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      });
+
+      if (req.method === 'HEAD') {
+        res.end();
+        return;
+      }
+
+      res.end(asset.buffer);
+      return;
+    }
+
     if (pathname === '/api/admin/login' && req.method === 'POST') {
       const requestIdentifier = getRequestIdentifier(req);
 
@@ -516,6 +576,32 @@ const server = http.createServer(async (req, res) => {
         sendUnauthorized(req, res, error.message);
       }
 
+      return;
+    }
+
+    if (pathname === '/api/uploads/featured' && req.method === 'POST') {
+      try {
+        authenticateAdminRequest(req);
+      } catch (error) {
+        sendUnauthorized(req, res, error.message);
+        return;
+      }
+
+      const upload = storeFeaturedUpload(
+        await parseRequestBody(req, {
+          maxBytes: maxFeaturedUploadBytes * 1.5,
+        }),
+      );
+
+      sendJson(req, res, 201, {
+        message: 'Featured image uploaded.',
+        data: {
+          imageUrl: upload.imageUrl,
+          publicUrl: `${getPublicBaseUrl(req)}${upload.imageUrl}`,
+          bytes: upload.bytes,
+          mimeType: upload.mimeType,
+        },
+      });
       return;
     }
 
@@ -845,6 +931,10 @@ const server = http.createServer(async (req, res) => {
           message: 'Featured project updated.',
           data: updateFeaturedProject(nextFeaturedProject),
         });
+
+        if (currentFeaturedProject.imageUrl !== nextFeaturedProject.imageUrl) {
+          deleteUnusedManagedFeaturedImage(currentFeaturedProject.imageUrl);
+        }
         return;
       }
 
@@ -857,6 +947,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         deleteFeaturedProject(featuredProjectId);
+        deleteUnusedManagedFeaturedImage(currentFeaturedProject.imageUrl);
         sendJson(req, res, 200, { message: 'Featured project deleted.' });
         return;
       }
