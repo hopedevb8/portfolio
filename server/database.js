@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 
 const rootDir = path.join(__dirname, '..');
 const dataDirectoryPath = path.join(__dirname, 'data');
@@ -66,7 +66,7 @@ const mapFeaturedRow = row => ({
 const createDatabase = () => {
   ensureDirectory(path.dirname(databaseFilePath));
 
-  const database = new DatabaseSync(databaseFilePath);
+  const database = new Database(databaseFilePath);
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS portfolio_sections (
