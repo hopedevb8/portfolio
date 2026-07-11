@@ -5,7 +5,7 @@ export const hex2rgba = (hex, alpha = 1) => {
 
 export const getApiBaseUrl = () => {
   if (process.env.GATSBY_API_BASE_URL) {
-    return process.env.GATSBY_API_BASE_URL;
+    return process.env.GATSBY_API_BASE_URL.replace(/\/+$/g, '');
   }
 
   if (typeof window !== 'undefined') {

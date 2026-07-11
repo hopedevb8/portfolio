@@ -1456,8 +1456,10 @@ const AdminPage = ({ location }) => {
             <div className="auth-card">
               <h2 className="auth-title">API unavailable</h2>
               <div className="auth-copy">
-                The admin CMS needs the Node.js backend running. Start `npm run api`, then reload
-                this page.
+                This deployment does not know where the admin API lives yet. For local development,
+                start `npm run api`. For GitHub Pages or any static production build, deploy the
+                Node.js API separately and rebuild the frontend with `GATSBY_API_BASE_URL` pointing
+                to that backend.
               </div>
             </div>
           )}

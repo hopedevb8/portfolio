@@ -10,12 +10,42 @@ const LOGIN_ATTEMPT_WINDOW_MS = Number(
 const LOGIN_ATTEMPT_MAX = Number(process.env.ADMIN_LOGIN_ATTEMPT_MAX || 5);
 const LOGIN_BLOCK_MS = Number(process.env.ADMIN_LOGIN_BLOCK_MS || 15 * 60 * 1000);
 const REFRESH_COOKIE_NAME = 'portfolio_admin_refresh';
+const REFRESH_COOKIE_DOMAIN = String(process.env.ADMIN_REFRESH_COOKIE_DOMAIN || '').trim();
 const ACCESS_TOKEN_SECRET =
   process.env.ADMIN_ACCESS_TOKEN_SECRET || 'change-this-secret-before-deploying';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me-admin-password';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 const AUTH_ISSUER = 'portfolio-admin-api';
+
+const normalizeSameSite = value => {
+  const normalizedValue = String(value || '').trim().toLowerCase();
+
+  if (normalizedValue === 'strict') {
+    return 'Strict';
+  }
+
+  if (normalizedValue === 'none') {
+    return 'None';
+  }
+
+  return 'Lax';
+};
+
+const REFRESH_COOKIE_SAME_SITE = normalizeSameSite(
+  process.env.ADMIN_REFRESH_COOKIE_SAME_SITE ||
+    (process.env.NODE_ENV === 'production' ? 'None' : 'Lax'),
+);
+const REFRESH_COOKIE_SECURE =
+  REFRESH_COOKIE_SAME_SITE === 'None'
+    ? true
+    : String(process.env.ADMIN_REFRESH_COOKIE_SECURE || '').trim()
+      ? String(process.env.ADMIN_REFRESH_COOKIE_SECURE).trim().toLowerCase() === 'true'
+      : process.env.NODE_ENV === 'production';
+const allowedOrigins = (process.env.ADMIN_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
 let didWarnAboutDefaults = false;
 
@@ -33,15 +63,16 @@ const warnAboutInsecureDefaults = () => {
     );
   }
 
+  if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+    console.warn(
+      '[auth] ADMIN_ALLOWED_ORIGINS is not set. Cross-origin admin login will be blocked unless the frontend origin is explicitly allowed.',
+    );
+  }
+
   didWarnAboutDefaults = true;
 };
 
 warnAboutInsecureDefaults();
-
-const allowedOrigins = (process.env.ADMIN_ALLOWED_ORIGINS || '')
-  .split(',')
-  .map(origin => origin.trim())
-  .filter(Boolean);
 const loginAttempts = new Map();
 
 const isAllowedOrigin = origin => {
@@ -199,18 +230,21 @@ const createRefreshTokenRecord = userName => {
 };
 
 const serializeRefreshCookie = (req, refreshTokenRecord) => {
-  const isSecure = process.env.NODE_ENV === 'production';
   const parts = [
     `${REFRESH_COOKIE_NAME}=${encodeURIComponent(
       `${refreshTokenRecord.sessionId}.${refreshTokenRecord.rawRefreshToken}`,
     )}`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Lax',
+    `SameSite=${REFRESH_COOKIE_SAME_SITE}`,
     `Max-Age=${Math.floor(REFRESH_TOKEN_TTL_MS / 1000)}`,
   ];
 
-  if (isSecure) {
+  if (REFRESH_COOKIE_DOMAIN) {
+    parts.push(`Domain=${REFRESH_COOKIE_DOMAIN}`);
+  }
+
+  if (REFRESH_COOKIE_SECURE) {
     parts.push('Secure');
   }
 
@@ -222,12 +256,16 @@ const clearRefreshCookie = () => {
     `${REFRESH_COOKIE_NAME}=`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Lax',
+    `SameSite=${REFRESH_COOKIE_SAME_SITE}`,
     'Max-Age=0',
     'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
   ];
 
-  if (process.env.NODE_ENV === 'production') {
+  if (REFRESH_COOKIE_DOMAIN) {
+    parts.push(`Domain=${REFRESH_COOKIE_DOMAIN}`);
+  }
+
+  if (REFRESH_COOKIE_SECURE) {
     parts.push('Secure');
   }
 

@@ -4,7 +4,9 @@ const { DatabaseSync } = require('node:sqlite');
 
 const rootDir = path.join(__dirname, '..');
 const dataDirectoryPath = path.join(__dirname, 'data');
-const databaseFilePath = path.join(dataDirectoryPath, 'portfolio.sqlite');
+const databaseFilePath = process.env.DATABASE_FILE_PATH
+  ? path.resolve(rootDir, process.env.DATABASE_FILE_PATH)
+  : path.join(dataDirectoryPath, 'portfolio.sqlite');
 const portfolioFilePath = path.join(rootDir, 'src', 'data', 'portfolio.json');
 const jobsFilePath = path.join(rootDir, 'src', 'data', 'jobs.json');
 const projectsFilePath = path.join(rootDir, 'src', 'data', 'projects.json');
@@ -62,7 +64,7 @@ const mapFeaturedRow = row => ({
 });
 
 const createDatabase = () => {
-  ensureDirectory(dataDirectoryPath);
+  ensureDirectory(path.dirname(databaseFilePath));
 
   const database = new DatabaseSync(databaseFilePath);
 
