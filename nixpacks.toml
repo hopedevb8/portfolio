@@ -1,0 +1,8 @@
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["echo 'Skipping Gatsby build for Railway API service'"]
+
+[start]
+cmd = "npm run api"

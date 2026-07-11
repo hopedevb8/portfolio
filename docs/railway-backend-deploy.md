@@ -10,14 +10,15 @@ This is the recommended path for direction A:
 
 1. Create a new Railway project from this GitHub repository.
 2. Create a service from the repo root.
-3. Set the start command to:
+3. Keep the root directory at the repository root.
+4. This repo includes [nixpacks.toml](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/nixpacks.toml:1), so Railway should:
 
-```bash
-npm run api
-```
+- run `npm ci`
+- skip the Gatsby frontend build
+- start the backend with `npm run api`
 
-4. In the service settings, enable Public Networking and generate a Railway domain.
-5. Attach a volume to the backend service and mount it at:
+5. In the service settings, enable Public Networking and generate a Railway domain.
+6. Attach a volume to the backend service and mount it at:
 
 ```text
 /data
@@ -49,6 +50,7 @@ Notes:
 - Railway injects `PORT`; the backend now reads it automatically.
 - The backend now defaults to `0.0.0.0` in production, so it can bind correctly on Railway.
 - The SQLite file should live on the mounted volume, not inside the ephemeral container filesystem.
+- The repo also includes [.dockerignore](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/.dockerignore:1) to avoid shipping local `node_modules`, `public`, and Gatsby cache into build context.
 
 ## Frontend build
 

@@ -1,0 +1,13 @@
+.git
+.github
+.cache
+.gatsby-config-home
+public
+node_modules
+server/data/*.sqlite
+*.log
+.env
+.env.local
+.env.development
+.env.production
+.DS_Store
