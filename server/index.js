@@ -379,6 +379,15 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/') {
+      sendJson(req, res, 200, {
+        status: 'ok',
+        service: 'portfolio-api',
+        message: 'Portfolio API is running.',
+      });
+      return;
+    }
+
     if (req.method === 'GET' && pathname === '/api/health') {
       sendJson(req, res, 200, {
         status: 'ok',
