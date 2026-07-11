@@ -1,0 +1,85 @@
+{
+  "site": {
+    "title": "Dinh Hop",
+    "description": "Dinh Hop is a frontend developer based in Vietnam with 4 years of experience building responsive web and mobile products with Next.js, React.js, React Native, Node.js, Shopify, WordPress, and AWS services.",
+    "siteUrl": "https://hopedev.pages.dev",
+    "image": "/og.png",
+    "twitterUsername": ""
+  },
+  "profile": {
+    "name": "Dinh Hop",
+    "location": "Vietnam",
+    "role": "Frontend Developer",
+    "email": "nguyendinhhop8400@gmail.com",
+    "navLinks": [
+      {
+        "name": "About",
+        "url": "/#about"
+      },
+      {
+        "name": "Experience",
+        "url": "/#jobs"
+      },
+      {
+        "name": "Work",
+        "url": "/#projects"
+      },
+      {
+        "name": "Contact",
+        "url": "/#contact"
+      }
+    ],
+    "socialMedia": [
+      {
+        "name": "GitHub",
+        "url": "https://github.com/hopedevb8"
+      },
+      {
+        "name": "Instagram",
+        "url": "https://www.instagram.com/_gepoh/"
+      },
+      {
+        "name": "Linkedin",
+        "url": "https://www.linkedin.com/in/hopnguyendinh/"
+      }
+    ],
+    "footer": {
+      "creditLink": "https://hopedev.pages.dev/",
+      "creditLabel": "Built by Dinh Hop",
+      "creditText": "Frontend Developer focused on React, Next.js, React Native, Shopify, and Node.js."
+    }
+  },
+  "hero": {
+    "greeting": "Hi, my name is",
+    "headline": "Dinh Hop.",
+    "subheadline": "I build frontend products for web and mobile.",
+    "description": "I'm a frontend developer with 4 years of experience building responsive products with Next.js, React.js, React Native, Node.js, Shopify, WordPress, and AWS-backed services. I focus on clean UI, reliable delivery, and scalable product experiences.",
+    "ctaLabel": "Let's work together"
+  },
+  "about": {
+    "paragraphs": [
+      "I'm Dinh Hop, a frontend developer based in Vietnam who enjoys building products that feel fast, clear, and easy to use. Over the last 4 years, I've focused on modern frontend delivery across product websites, e-commerce, content platforms, and cross-platform apps.",
+      "My work spans Next.js and React applications, React Native mobile experiences, Shopify storefronts, WordPress builds, and Node.js integrations. I've also worked with AWS services to support deployment workflows, third-party integrations, and production-ready web platforms.",
+      "I care about responsive UI, maintainable code, and shipping dependable products with designers, PMs, and engineers. A lot of my recent work has been in e-commerce, content hubs, NFT/community platforms, and internal product tools."
+    ],
+    "skillsIntro": "Here are a few technologies I've been working with recently:",
+    "skills": [
+      "Next.js",
+      "React.js",
+      "React Native",
+      "TypeScript",
+      "Node.js",
+      "Shopify",
+      "WordPress",
+      "AWS",
+      "Redux Toolkit",
+      "Tailwind CSS"
+    ]
+  },
+  "contact": {
+    "overline": "Get In Touch",
+    "title": "Let's build something solid",
+    "description": "I'm open to frontend opportunities, Shopify and WordPress work, React Native builds, and product teams that need a reliable engineer to ship clean UI and maintainable code. If you have a project in mind, send me a message.",
+    "ctaLabel": "Email Me"
+  }
+}

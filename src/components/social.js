@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { socialMedia } from '@config';
 import { Side } from '@components';
 import { Icon } from '@components/icons';
+import { usePortfolio } from '../context/portfolio';
 
 const StyledSocialList = styled.ul`
   display: flex;
@@ -43,20 +43,24 @@ const StyledSocialList = styled.ul`
   }
 `;
 
-const Social = ({ isHome }) => (
-  <Side isHome={isHome} orientation="left">
-    <StyledSocialList>
-      {socialMedia &&
-        socialMedia.map(({ url, name }, i) => (
+const Social = ({ isHome }) => {
+  const { portfolio } = usePortfolio();
+  const socialMedia = portfolio.profile?.socialMedia || [];
+
+  return (
+    <Side isHome={isHome} orientation="left">
+      <StyledSocialList>
+        {socialMedia.map(({ url, name }, i) => (
           <li key={i}>
             <a href={url} aria-label={name} target="_blank" rel="noreferrer">
               <Icon name={name} />
             </a>
           </li>
         ))}
-    </StyledSocialList>
-  </Side>
-);
+      </StyledSocialList>
+    </Side>
+  );
+};
 
 Social.propTypes = {
   isHome: PropTypes.bool,

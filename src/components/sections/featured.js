@@ -1,10 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { useStaticQuery, graphql } from 'gatsby';
-import { GatsbyImage, getImage } from 'gatsby-plugin-image';
 import styled from 'styled-components';
 import sr from '@utils/sr';
 import { srConfig } from '@config';
 import { Icon } from '@components/icons';
+import { useFeaturedData } from '@hooks/useFeaturedData';
 import { usePrefersReducedMotion } from '@hooks';
 
 const StyledProjectsGrid = styled.ul`
@@ -170,15 +169,6 @@ const StyledProject = styled.li`
         box-shadow: none;
       }
     }
-
-    a {
-      ${({ theme }) => theme.mixins.inlineLink};
-    }
-
-    strong {
-      color: var(--white);
-      font-weight: normal;
-    }
   }
 
   .project-tech-list {
@@ -228,9 +218,12 @@ const StyledProject = styled.li`
         }
       }
 
-      svg {
-        width: 20px;
-        height: 20px;
+      &.github {
+        svg {
+          width: 24px;
+          height: 24px;
+          margin-top: -4px;
+        }
       }
     }
 
@@ -246,6 +239,7 @@ const StyledProject = styled.li`
     grid-row: 1 / -1;
     position: relative;
     z-index: 1;
+    min-height: 100%;
 
     @media (max-width: 768px) {
       grid-column: 1 / -1;
@@ -254,6 +248,7 @@ const StyledProject = styled.li`
     }
 
     a {
+      display: block;
       width: 100%;
       height: 100%;
       background-color: var(--green);
@@ -266,7 +261,7 @@ const StyledProject = styled.li`
         outline: 0;
 
         &:before,
-        .img {
+        img {
           background: transparent;
           filter: none;
         }
@@ -288,15 +283,16 @@ const StyledProject = styled.li`
       }
     }
 
-    .img {
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
       border-radius: var(--border-radius);
+      object-fit: cover;
       mix-blend-mode: multiply;
       filter: grayscale(100%) contrast(1) brightness(90%);
 
       @media (max-width: 768px) {
-        object-fit: cover;
-        width: auto;
-        height: 100%;
         filter: grayscale(100%) contrast(1) brightness(50%);
       }
     }
@@ -304,37 +300,7 @@ const StyledProject = styled.li`
 `;
 
 const Featured = () => {
-  const data = useStaticQuery(graphql`
-    {
-      featured: allMarkdownRemark(
-        filter: {
-          fileAbsolutePath: { regex: "/content/featured/" }
-          frontmatter: { profile: { eq: "dinhhop" } }
-        }
-        sort: { fields: [frontmatter___date], order: ASC }
-      ) {
-        edges {
-          node {
-            frontmatter {
-              title
-              cover {
-                childImageSharp {
-                  gatsbyImageData(width: 700, placeholder: BLURRED, formats: [AUTO, WEBP, AVIF])
-                }
-              }
-              tech
-              github
-              external
-              cta
-            }
-            html
-          }
-        }
-      }
-    }
-  `);
-
-  const featuredProjects = data.featured.edges.filter(({ node }) => node);
+  const { featuredProjects } = useFeaturedData();
   const revealTitle = useRef(null);
   const revealProjects = useRef([]);
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -346,7 +312,7 @@ const Featured = () => {
 
     sr.reveal(revealTitle.current, srConfig());
     revealProjects.current.forEach((ref, i) => sr.reveal(ref, srConfig(i * 100)));
-  }, []);
+  }, [prefersReducedMotion, featuredProjects.length]);
 
   return (
     <section id="projects">
@@ -355,63 +321,67 @@ const Featured = () => {
       </h2>
 
       <StyledProjectsGrid>
-        {featuredProjects &&
-          featuredProjects.map(({ node }, i) => {
-            const { frontmatter, html } = node;
-            const { external, title, tech, github, cover, cta } = frontmatter;
-            const image = getImage(cover);
+        {featuredProjects.map((project, i) => {
+          const { id, title, description, tech, github, external, cta, imageUrl } = project;
+          const projectUrl = external || github || '#';
 
-            return (
-              <StyledProject key={i} ref={el => (revealProjects.current[i] = el)}>
-                <div className="project-content">
-                  <div>
-                    <p className="project-overline">Featured Build</p>
+          return (
+            <StyledProject key={id || i} ref={el => (revealProjects.current[i] = el)}>
+              <div className="project-content">
+                <div>
+                  <p className="project-overline">Featured Build</p>
 
-                    <h3 className="project-title">
-                      <a href={external}>{title}</a>
-                    </h3>
+                  <h3 className="project-title">
+                    <a href={projectUrl} target="_blank" rel="noreferrer">
+                      {title}
+                    </a>
+                  </h3>
 
-                    <div
-                      className="project-description"
-                      dangerouslySetInnerHTML={{ __html: html }}
-                    />
+                  <div className="project-description">
+                    <p>{description}</p>
+                  </div>
 
-                    {tech.length && (
-                      <ul className="project-tech-list">
-                        {tech.map((tech, i) => (
-                          <li key={i}>{tech}</li>
-                        ))}
-                      </ul>
+                  {tech?.length > 0 && (
+                    <ul className="project-tech-list">
+                      {tech.map(item => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div className="project-links">
+                    {cta && (
+                      <a href={cta} aria-label="Project Link" className="cta" target="_blank" rel="noreferrer">
+                        View Project
+                      </a>
                     )}
-
-                    <div className="project-links">
-                      {cta && (
-                        <a href={cta} aria-label="Project Link" className="cta">
-                          View Project
-                        </a>
-                      )}
-                      {github && (
-                        <a href={github} aria-label="GitHub Link">
-                          <Icon name="GitHub" />
-                        </a>
-                      )}
-                      {external && !cta && (
-                        <a href={external} aria-label="External Link" className="external">
-                          <Icon name="External" />
-                        </a>
-                      )}
-                    </div>
+                    {github && (
+                      <a href={github} aria-label="GitHub Link" target="_blank" rel="noreferrer" className="github">
+                        <Icon name="GitHub" />
+                      </a>
+                    )}
+                    {external && !cta && (
+                      <a
+                        href={external}
+                        aria-label="External Link"
+                        className="external"
+                        target="_blank"
+                        rel="noreferrer">
+                        <Icon name="External" />
+                      </a>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                <div className="project-image">
-                  <a href={external ? external : github ? github : '#'}>
-                    <GatsbyImage image={image} alt={title} className="img" />
-                  </a>
-                </div>
-              </StyledProject>
-            );
-          })}
+              <div className="project-image">
+                <a href={projectUrl} target="_blank" rel="noreferrer">
+                  <img src={imageUrl} alt={title} loading="lazy" />
+                </a>
+              </div>
+            </StyledProject>
+          );
+        })}
       </StyledProjectsGrid>
     </section>
   );

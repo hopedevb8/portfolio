@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { srConfig } from '@config';
 import sr from '@utils/sr';
 import { usePrefersReducedMotion } from '@hooks';
+import { usePortfolio } from '../../context/portfolio';
 
 const StyledAboutSection = styled.section`
   max-width: 900px;
@@ -116,6 +117,10 @@ const StyledPic = styled.div`
 const About = () => {
   const revealContainer = useRef(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { portfolio } = usePortfolio();
+  const about = portfolio.about || {};
+  const skills = about.skills || [];
+  const paragraphs = about.paragraphs || [];
 
   useEffect(() => {
     if (prefersReducedMotion) {
@@ -125,19 +130,6 @@ const About = () => {
     sr.reveal(revealContainer.current, srConfig());
   }, []);
 
-  const skills = [
-    'Next.js',
-    'React.js',
-    'React Native',
-    'TypeScript',
-    'Node.js',
-    'Shopify',
-    'WordPress',
-    'AWS',
-    'Redux Toolkit',
-    'Tailwind CSS',
-  ];
-
   return (
     <StyledAboutSection id="about" ref={revealContainer}>
       <h2 className="numbered-heading">About Me</h2>
@@ -145,31 +137,17 @@ const About = () => {
       <div className="inner">
         <StyledText>
           <div>
-            <p>
-              I&apos;m Dinh Hop, a frontend developer based in Vietnam who enjoys building products
-              that feel fast, clear, and easy to use. Over the last 4 years, I&apos;ve focused on
-              modern frontend delivery across product websites, e-commerce, content platforms, and
-              cross-platform apps.
-            </p>
+            {paragraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
 
-            <p>
-              My work spans Next.js and React applications, React Native mobile experiences,
-              Shopify storefronts, WordPress builds, and Node.js integrations. I&apos;ve also
-              worked with AWS services to support deployment workflows, third-party integrations,
-              and production-ready web platforms.
-            </p>
-
-            <p>
-              I care about responsive UI, maintainable code, and shipping dependable products with
-              designers, PMs, and engineers. A lot of my recent work has been in e-commerce,
-              content hubs, NFT/community platforms, and internal product tools.
-            </p>
-
-            <p>Here are a few technologies I’ve been working with recently:</p>
+            <p>{about.skillsIntro}</p>
           </div>
 
           <ul className="skills-list">
-            {skills && skills.map((skill, i) => <li key={i}>{skill}</li>)}
+            {skills.map((skill, i) => (
+              <li key={i}>{skill}</li>
+            ))}
           </ul>
         </StyledText>
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import styled from 'styled-components';
-import { email } from '@config';
 import { navDelay, loaderDelay } from '@utils';
 import { usePrefersReducedMotion } from '@hooks';
+import { usePortfolio } from '../../context/portfolio';
 
 const StyledHeroSection = styled.section`
   ${({ theme }) => theme.mixins.flexCenter};
@@ -50,6 +50,9 @@ const StyledHeroSection = styled.section`
 const Hero = () => {
   const [isMounted, setIsMounted] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { portfolio } = usePortfolio();
+  const email = portfolio.profile?.email || '';
+  const hero = portfolio.hero || {};
 
   useEffect(() => {
     if (prefersReducedMotion) {
@@ -60,21 +63,17 @@ const Hero = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  const one = <h1>Hi, my name is</h1>;
-  const two = <h2 className="big-heading">Dinh Hop.</h2>;
-  const three = <h3 className="big-heading">I build frontend products for web and mobile.</h3>;
+  const one = <h1>{hero.greeting}</h1>;
+  const two = <h2 className="big-heading">{hero.headline}</h2>;
+  const three = <h3 className="big-heading">{hero.subheadline}</h3>;
   const four = (
     <>
-      <p>
-        I&apos;m a frontend developer with 4 years of experience building responsive products with
-        Next.js, React.js, React Native, Node.js, Shopify, WordPress, and AWS-backed services. I
-        focus on clean UI, reliable delivery, and scalable product experiences.
-      </p>
+      <p>{hero.description}</p>
     </>
   );
   const five = (
     <a className="email-link" href={`mailto:${email}`}>
-      Let&apos;s work together
+      {hero.ctaLabel}
     </a>
   );
 

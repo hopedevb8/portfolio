@@ -7,3 +7,4 @@ public/
 .env.development
 .env.production
 .env.local
+server/data/*.sqlite

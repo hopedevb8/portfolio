@@ -3,6 +3,22 @@ export const hex2rgba = (hex, alpha = 1) => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
+export const getApiBaseUrl = () => {
+  if (process.env.GATSBY_API_BASE_URL) {
+    return process.env.GATSBY_API_BASE_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `http://${hostname}:3001`;
+    }
+  }
+
+  return '';
+};
+
 export const navDelay = 1000;
 export const loaderDelay = 2000;
 

@@ -1,47 +1,4 @@
 module.exports = {
-  siteTitle: 'Dinh Hop',
-  siteDescription:
-    'Dinh Hop is a frontend developer based in Vietnam with 4 years of experience building responsive web and mobile products with Next.js, React.js, React Native, Node.js, Shopify, WordPress, and AWS services.',
-  siteUrl: 'https://hopedev.pages.dev',
-  name: 'Dinh Hop',
-  location: 'Vietnam',
-  role: 'Frontend Developer',
-  email: 'nguyendinhhop8400@gmail.com',
-
-  socialMedia: [
-    {
-      name: 'GitHub',
-      url: 'https://github.com/hopedevb8',
-    },
-    {
-      name: 'Instagram',
-      url: 'https://www.instagram.com/_gepoh/',
-    },
-    {
-      name: 'Linkedin',
-      url: 'https://www.linkedin.com/in/hopnguyendinh/',
-    },
-  ],
-
-  navLinks: [
-    {
-      name: 'About',
-      url: '/#about',
-    },
-    {
-      name: 'Experience',
-      url: '/#jobs',
-    },
-    {
-      name: 'Work',
-      url: '/#projects',
-    },
-    {
-      name: 'Contact',
-      url: '/#contact',
-    },
-  ],
-
   colors: {
     green: '#64ffda',
     navy: '#0a192f',

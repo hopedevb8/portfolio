@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { socialMedia } from '@config';
 import { Icon } from '@components/icons';
+import { usePortfolio } from '../context/portfolio';
 
 const StyledFooter = styled.footer`
   ${({ theme }) => theme.mixins.flexCenter};
@@ -50,26 +50,31 @@ const StyledCredit = styled.div`
   }
 `;
 
-const Footer = () => (
-  <StyledFooter>
-    <StyledSocialLinks>
-      <ul>
-        {socialMedia &&
-          socialMedia.map(({ name, url }, i) => (
+const Footer = () => {
+  const { portfolio } = usePortfolio();
+  const socialMedia = portfolio.profile?.socialMedia || [];
+  const footer = portfolio.profile?.footer || {};
+
+  return (
+    <StyledFooter>
+      <StyledSocialLinks>
+        <ul>
+          {socialMedia.map(({ name, url }, i) => (
             <li key={i}>
               <a href={url} aria-label={name}>
                 <Icon name={name} />
               </a>
             </li>
           ))}
-      </ul>
-    </StyledSocialLinks>
+        </ul>
+      </StyledSocialLinks>
 
-    <StyledCredit tabIndex="-1">
-      <a href="https://hopedev.pages.dev/">Built by Dinh Hop</a>
-      <div>Frontend Developer focused on React, Next.js, React Native, Shopify, and Node.js.</div>
-    </StyledCredit>
-  </StyledFooter>
-);
+      <StyledCredit tabIndex="-1">
+        <a href={footer.creditLink}>{footer.creditLabel}</a>
+        <div>{footer.creditText}</div>
+      </StyledCredit>
+    </StyledFooter>
+  );
+};
 
 export default Footer;

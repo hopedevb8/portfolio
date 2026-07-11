@@ -1,13 +1,14 @@
 const config = require('./src/config');
+const portfolio = require('./src/data/portfolio.json');
 
 module.exports = {
   pathPrefix: '/portfolio',
   siteMetadata: {
-    title: config.siteTitle,
-    description: config.siteDescription,
-    siteUrl: config.siteUrl, // No trailing slash allowed!
-    image: '/og.png', // Path to your image you placed in the 'static' folder
-    twitterUsername: '',
+    title: portfolio.site.title,
+    description: portfolio.site.description,
+    siteUrl: portfolio.site.siteUrl, // No trailing slash allowed!
+    image: portfolio.site.image,
+    twitterUsername: portfolio.site.twitterUsername,
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
@@ -20,8 +21,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: config.siteTitle,
-        short_name: config.siteTitle,
+        name: portfolio.site.title,
+        short_name: portfolio.site.title,
         start_url: '/',
         background_color: config.colors.darkNavy,
         theme_color: config.colors.navy,

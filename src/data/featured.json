@@ -1,0 +1,47 @@
+[
+  {
+    "id": "evisu-official-online-store",
+    "date": "2023-05-01",
+    "title": "EVISU Official Online Store",
+    "imageUrl": "/featured/evisu-official-online-store-cover.png",
+    "github": "https://github.com/branch8/project-shopify-evisu",
+    "external": "https://evisu.com.hk/",
+    "cta": "https://evisu.com.hk/",
+    "tech": [
+      "Shopify",
+      "Node.js",
+      "jQuery"
+    ],
+    "description": "Official EVISU storefront focused on polished shopping flows, responsive UI, and a premium retail presentation. Built around Shopify with custom frontend behaviors and supporting Node.js integration work."
+  },
+  {
+    "id": "9proxy",
+    "date": "2025-05-01",
+    "title": "9Proxy",
+    "imageUrl": "/featured/9proxy-cover.png",
+    "github": "https://github.com/cybersharkjsc/prx-fe-module-website-v2",
+    "external": "https://9proxy.com/",
+    "cta": "https://9proxy.com/",
+    "tech": [
+      "Next.js",
+      "Ant Design",
+      "Shadcn UI",
+      "Framer Motion"
+    ],
+    "description": "An affordable and versatile residential proxy network for seamless global data collection, offering exceptional performance and reliability even when operating at a large scale. Built the modern front-end dashboard featuring interactive country-level geo-targeting, real-time usage monitoring, and stable session management integrations."
+  },
+  {
+    "id": "best-bean-best-cup",
+    "date": "2026-10-01",
+    "title": "Best Bean Best Cup",
+    "imageUrl": "/featured/best-bean-best-cup-cover.png",
+    "github": "https://github.com/HoanNguyenDinh/bbbd",
+    "external": "https://bestbeanbestcup.com.au/",
+    "cta": "https://bestbeanbestcup.com.au/",
+    "tech": [
+      "Shopify",
+      "jQuery"
+    ],
+    "description": "A premium e-commerce storefront for an artisanal coffee brand, designed to present a compelling product story and maximize customer conversions. Features custom Shopify templates, optimized product pages, dynamic filters, and custom interactive behaviors using jQuery."
+  }
+]

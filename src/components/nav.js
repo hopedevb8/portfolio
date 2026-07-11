@@ -3,11 +3,11 @@ import { Link } from 'gatsby';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import styled from 'styled-components';
-import { email, navLinks } from '@config';
 import { loaderDelay } from '@utils';
 import { usePrefersReducedMotion } from '@hooks';
 import { Menu } from '@components';
 import { IconLogo, IconHex } from '@components/icons';
+import { usePortfolio } from '../context/portfolio';
 
 const StyledHeader = styled.header`
   ${({ theme }) => theme.mixins.flexBetween};
@@ -143,6 +143,9 @@ const Nav = ({ isHome }) => {
   const [isMounted, setIsMounted] = useState(!isHome);
   const [scrolledToTop, setScrolledToTop] = useState(true);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { portfolio } = usePortfolio();
+  const email = portfolio.profile?.email || '';
+  const navLinks = portfolio.profile?.navLinks || [];
 
   const handleScroll = () => {
     setScrolledToTop(window.pageYOffset < 50);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStaticQuery, graphql } from 'gatsby';
 import { CSSTransition } from 'react-transition-group';
 import styled from 'styled-components';
 import { srConfig } from '@config';
+import { useJobsData } from '@hooks/useJobsData';
 import { KEY_CODES } from '@utils';
 import sr from '@utils/sr';
 import { usePrefersReducedMotion } from '@hooks';
@@ -165,38 +165,12 @@ const StyledTabPanel = styled.div`
 `;
 
 const Jobs = () => {
-  const data = useStaticQuery(graphql`
-    query {
-      jobs: allMarkdownRemark(
-        filter: {
-          fileAbsolutePath: { regex: "/content/jobs/" }
-          frontmatter: { profile: { eq: "dinhhop" } }
-        }
-        sort: { fields: [frontmatter___date], order: DESC }
-      ) {
-        edges {
-          node {
-            frontmatter {
-              title
-              company
-              location
-              range
-              url
-            }
-            html
-          }
-        }
-      }
-    }
-  `);
-
-  const jobsData = data.jobs.edges;
-
   const [activeTabId, setActiveTabId] = useState(0);
   const [tabFocus, setTabFocus] = useState(null);
   const tabs = useRef([]);
   const revealContainer = useRef(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { jobs: jobsData } = useJobsData();
 
   useEffect(() => {
     if (prefersReducedMotion) {
@@ -223,6 +197,12 @@ const Jobs = () => {
 
   // Only re-run the effect if tabFocus changes
   useEffect(() => focusTab(), [tabFocus]);
+
+  useEffect(() => {
+    if (activeTabId > jobsData.length - 1) {
+      setActiveTabId(0);
+    }
+  }, [activeTabId, jobsData.length]);
 
   // Focus on tabs when using up & down arrow keys
   const onKeyDown = e => {
@@ -251,65 +231,59 @@ const Jobs = () => {
 
       <div className="inner">
         <StyledTabList role="tablist" aria-label="Job tabs" onKeyDown={e => onKeyDown(e)}>
-          {jobsData &&
-            jobsData.map(({ node }, i) => {
-              const { company } = node.frontmatter;
-              return (
-                <StyledTabButton
-                  key={i}
-                  isActive={activeTabId === i}
-                  onClick={() => setActiveTabId(i)}
-                  ref={el => (tabs.current[i] = el)}
-                  id={`tab-${i}`}
-                  role="tab"
-                  tabIndex={activeTabId === i ? '0' : '-1'}
-                  aria-selected={activeTabId === i ? true : false}
-                  aria-controls={`panel-${i}`}>
-                  <span>{company}</span>
-                </StyledTabButton>
-              );
-            })}
+          {jobsData.map(({ company, id }, i) => (
+            <StyledTabButton
+              key={id}
+              isActive={activeTabId === i}
+              onClick={() => setActiveTabId(i)}
+              ref={el => (tabs.current[i] = el)}
+              id={`tab-${i}`}
+              role="tab"
+              tabIndex={activeTabId === i ? '0' : '-1'}
+              aria-selected={activeTabId === i}
+              aria-controls={`panel-${i}`}>
+              <span>{company}</span>
+            </StyledTabButton>
+          ))}
           <StyledHighlight activeTabId={activeTabId} />
         </StyledTabList>
 
         <StyledTabPanels>
-          {jobsData &&
-            jobsData.map(({ node }, i) => {
-              const { frontmatter, html } = node;
-              const { title, url, company, range } = frontmatter;
-
-              return (
-                <CSSTransition key={i} in={activeTabId === i} timeout={250} classNames="fade">
-                  <StyledTabPanel
-                    id={`panel-${i}`}
-                    role="tabpanel"
-                    tabIndex={activeTabId === i ? '0' : '-1'}
-                    aria-labelledby={`tab-${i}`}
-                    aria-hidden={activeTabId !== i}
-                    hidden={activeTabId !== i}>
-                    <h3>
-                      <span>{title}</span>
-                      {company && (
-                        <span className="company">
-                          &nbsp;@&nbsp;
-                          {url ? (
-                            <a href={url} className="inline-link">
-                              {company}
-                            </a>
-                          ) : (
-                            <span>{company}</span>
-                          )}
-                        </span>
+          {jobsData.map(({ id, title, url, company, range, highlights }, i) => (
+            <CSSTransition key={id} in={activeTabId === i} timeout={250} classNames="fade">
+              <StyledTabPanel
+                id={`panel-${i}`}
+                role="tabpanel"
+                tabIndex={activeTabId === i ? '0' : '-1'}
+                aria-labelledby={`tab-${i}`}
+                aria-hidden={activeTabId !== i}
+                hidden={activeTabId !== i}>
+                <h3>
+                  <span>{title}</span>
+                  {company && (
+                    <span className="company">
+                      &nbsp;@&nbsp;
+                      {url ? (
+                        <a href={url} className="inline-link">
+                          {company}
+                        </a>
+                      ) : (
+                        <span>{company}</span>
                       )}
-                    </h3>
+                    </span>
+                  )}
+                </h3>
 
-                    <p className="range">{range}</p>
+                <p className="range">{range}</p>
 
-                    <div dangerouslySetInnerHTML={{ __html: html }} />
-                  </StyledTabPanel>
-                </CSSTransition>
-              );
-            })}
+                <ul>
+                  {highlights.map((highlight, highlightIndex) => (
+                    <li key={highlightIndex}>{highlight}</li>
+                  ))}
+                </ul>
+              </StyledTabPanel>
+            </CSSTransition>
+          ))}
         </StyledTabPanels>
       </div>
     </StyledJobsSection>

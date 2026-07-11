@@ -13,8 +13,11 @@
   "license": "MIT",
   "browserslist": "> 0.25%, not dead",
   "scripts": {
+    "api": "node server/index.js",
+    "admin:hash-password": "node scripts/hash-admin-password.cjs",
     "build": "node scripts/run-gatsby.cjs build",
     "develop": "node scripts/run-gatsby.cjs develop",
+    "dev:full": "node scripts/dev-full.cjs",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "generate:favicons": "node scripts/generate-favicons.cjs",
     "start": "npm run develop",
