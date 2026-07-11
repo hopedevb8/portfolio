@@ -16,6 +16,7 @@ This is the recommended path for direction A:
 - run `npm ci`
 - skip the Gatsby frontend build
 - start the backend with `npm run api`
+- use Node `22.x` from [package.json](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/package.json:1)
 
 5. In the service settings, enable Public Networking and generate a Railway domain.
 6. Attach a volume to the backend service and mount it at:
@@ -51,6 +52,7 @@ Notes:
 - The backend now defaults to `0.0.0.0` in production, so it can bind correctly on Railway.
 - The SQLite file should live on the mounted volume, not inside the ephemeral container filesystem.
 - The repo also includes [.dockerignore](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/.dockerignore:1) to avoid shipping local `node_modules`, `public`, and Gatsby cache into build context.
+- If Railway still shows Node `18.x`, set the service Node version to `22` or recreate the service after pushing the updated [package.json](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/package.json:1) and [.nvmrc](/Users/macbookcuahopdoaaaaa/Documents/GitHub/portfolio/.nvmrc:1).
 
 ## Frontend build
 
