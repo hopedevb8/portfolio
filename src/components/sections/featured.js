@@ -224,7 +224,6 @@ const StyledProject = styled.li`
         svg {
           width: 24px;
           height: 24px;
-          margin-top: -4px;
         }
       }
     }
@@ -241,7 +240,6 @@ const StyledProject = styled.li`
     grid-row: 1 / -1;
     position: relative;
     z-index: 1;
-    min-height: 100%;
 
     @media (max-width: 768px) {
       grid-column: 1 / -1;
