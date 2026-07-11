@@ -80,6 +80,7 @@ const StyledAdminPage = styled.div`
 
   .tabs {
     display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 12px;
     align-content: start;
   }
